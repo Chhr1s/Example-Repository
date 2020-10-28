@@ -1,0 +1,93 @@
+---
+title: "Lab 4"
+author: "Christopher Loan"
+date: "October 14, 2020"
+output:
+  "pdf_document"
+---
+
+```{r setup, include=FALSE}
+ knitr::opts_chunk$set(message = FALSE, 
+                       warning = FALSE)
+```
+
+
+Install and load the package *Lahman*, which will give you access to the dataset *Teams*
+
+```{r teams_echo, echo = TRUE}
+
+library(Lahman)
+library(tidyverse)
+library(janitor)
+```
+* Produce a subset of the data (as a new object) that has the following characteristics:
+    + Only one team (your choice)
+    + data from 1980 to present (or as present as the dataset gets)
+    + Includes 5 columns: name, yearID, W, L, R, RA
+
+(The variables above correspond to the team name, the year, wins, losses, runs scored, and runs allowed)
+
+* Make sure you select a team that is currently still around, or it probably
+won't be interesting (see a list of current at [http://www.espn.com/mlb/teams](http://www.espn.com/mlb/teams)).
+
+* Create a new variable corresponding to the winning percentage for the team 
+  you chose over time
+
+$$w_{pct} = \frac{wins}{wins + losses}$$
+
+* Order by winning percentage: Least to greatest
+* Order by winning percentage: greatest to least
+* Compute the mean and standard deviation of winning percentage
+* With the full dataset
+  + compute the average and standard deviation of winning percentage for each team. 
+  + Order by highest winning percentage
+* Use the full data to reproduce the plot below
+
+```{r select_team}
+subset1 <- Teams %>% filter(teamID == teamID[length(Teams$teamID)], yearID >= 1980) %>% select(yearID, W, L, R, RA)
+subset1
+```
+
+```{r win_percentage}
+subset1 <- subset1 %>% mutate(win_perc = W/(W+L))
+subset1
+```
+
+```{r reordering}
+low_to_high <- subset1 %>% arrange(win_perc)
+low_to_high
+high_to_low <- subset1 %>% arrange(desc(win_perc))
+high_to_low
+```
+
+```{r mean_and_sd}
+subset1 %>% summarize(avg_wins = mean(win_perc))
+subset1 %>% summarize(sd_of_wins = sd(win_perc))
+```
+
+```{r full_mean}
+Teams %>% group_by(teamID) %>% mutate(win_perc = W/(W+L)) %>% summarize(avg_wins = mean(win_perc))
+```
+
+```{r full_sd}
+Teams %>% group_by(teamID) %>% mutate(win_perc = W/(W+L)) %>% summarize(sd_of_wins = sd(win_perc))
+```
+
+```{r full_desc}
+Teams %>% group_by(teamID) %>% mutate(win_perc = W/(W+L)) %>% summarize(avg_wins = mean(win_perc)) %>% arrange(desc(avg_wins))
+```
+
+```{r plot}
+# Please put the code for the plot in this chunk.
+Teams %>% 
+  filter(name == 'Detroit Tigers'| 
+           name == 'New York Yankees'|
+           name == 'San Diego Padres') %>% 
+  mutate(win_perc = W/(W+L)) %>%  
+  ggplot(mapping = aes(x = yearID, 
+                       y = win_perc, 
+                       color = name)) + 
+  geom_line() + labs(color = 'Team', 
+                     x = 'year_id', 
+                     y = 'w_pct')
+```

@@ -1,0 +1,138 @@
+---
+title: "Loan EDLD 651 Lab 3"
+author: "Chris Loan"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+1. Run the following code to load the *tidyverse*.
+
+```{r load-tidyverse}
+library(tidyverse)
+```
+
+1. Run the following lines of code to view and read about the data we'll use 
+for this lab. 
+
+Comment out line 26 after you run it, but puting a `#` at the start.
+
+```{r gsscat, eval = FALSE}
+str(gss_cat)
+#View(gss_cat)
+#?gss_cat 
+```
+
+2. Use `ggplot` to create a histogram of `tvhours`. The plot should:
+  + Include a small amount of transparency so gridlines are visible under the 
+    histogram.
+  + Be a different color than the default
+  + Include meaningful axis labels
+  + Have a title and a subtitle
+
+```{r question-2}
+p1 <- ggplot(data = gss_cat, aes(x = tvhours)) +
+  geom_histogram(fill = "blue", color = "black", alpha = 0.1) + 
+  labs(x = "Hours of TV", 
+       title = "Counts of TV hours",
+       subtitle = "made from gss_cat dataset")
+p1
+```
+
+3. Create a ridgeline density plot of `age` by `partyid`. Do you notice any strong
+  differences by party affiliation?
+
+```{r question-3}
+library(ggridges)
+
+p2 <- ggplot(data = gss_cat, aes(x = age, y = partyid)) + ggridges::geom_density_ridges()
+p2
+```
+
+    * With only visual inspection, it's difficult to tell (and I feel I'm not good at density ridges yet; i.e., I can't tell what's about distribution vs. magnitude).
+    * Though, it appears that older people are more likely to endorse strong affiliation with a party, compared to younger. 
+
+4. Modify the plot from Question 3 to produce separate ridgeline densities by `race`. Do you see any patterns?
+
+```{r question-4}
+p3 <- ggplot(data = gss_cat, aes(x = age, y = partyid)) + geom_density_ridges() + facet_wrap(~race)
+p3
+```
+
+    * To me, I still see the same pattern, with more partisan endorsement as age increases.
+    * This trend appears similar across age, but again, I'm not certain it is significant.
+
+5. Replicate the plots from Questions 3 and 4, but this time displaying the relations with boxplots (i.e., one boxplot from Question 3 and one boxplot for Question 4 in the chunk below). Which do you think displays the relation more clearly? Why?
+  
+```{r label, options}
+p4 <- ggplot(data = gss_cat, aes(x = age, y = partyid)) + geom_boxplot() 
+p4
+p5 <- ggplot(data = gss_cat, aes(x = age, y = partyid)) + geom_boxplot() + facet_wrap(~race) 
+p5
+```
+
+
+    * I personally prefer the boxplots, but that's mainly because I'm more confident in interpretting them.
+    * I think the density plots are nice for showing a distribution is normal (or follows another distribution).
+
+6. Run the following lines of code to get a correlation table as a data frame.
+
+```{r corr-mat-df}
+# You might need to install the ISLR package using the line below. 
+# If so, uncomment out the line, install the pacakge, then comment the line again. 
+# Your document won't knit if you do not comment the line below.
+
+# install.packages(ISLR) 
+library(ISLR)
+cor_tbl <- Hitters %>% 
+  select_if(is.numeric) %>% 
+  cor(use = "pairwise.complete.obs") %>% 
+  as.data.frame() %>% 
+  mutate(row = row.names(.)) %>% 
+  pivot_longer(
+    cols = -row,
+    names_to = "col",
+    values_to = "cor"
+  ) %>% 
+  tbl_df()
+```
+
+Use the correlation table to create a heatmap using `geom_tile`. Change the 
+colors to one of the four viridis palettes. What does the heatmap help you see?
+
+```{r, heatmap}
+library(viridis)
+ggplot(cor_tbl, aes(x = row, y = col, fill = cor)) + geom_tile() + scale_fill_viridis_c()
+```
+
+7. The code below will produce a barplot. 
+
+```{r barplot1}
+ggplot(gss_cat, aes(rincome)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+Use the code below to create a new data set - `gss_cat_new` - that redefines the `rincome` variable so that *Not applicable* is displayed first, followed by *No answer*, *Don't know*, *Refused*, and then each income category from lowest to highest. Once you've redefined the factor variable, re-produce the plot above by running the `ggplot` code at the bottom of the chunk. The plot should have *Not applicable* closest to the y-axis, then *No answer*, *Don't know*, etc.
+
+```{r redfine-factor, echo = FALSE}
+gss_relevel <- rev(levels(gss_cat$rincome))
+
+gss_relevel <- c("Not applicable",
+                 "No answer",
+                 "Don't know", 
+                 "Refused", 
+                 gss_relevel[2:13])
+
+gss_cat_new <- gss_cat %>% 
+  mutate(rincome = factor(rincome, levels = gss_relevel))
+
+ggplot(gss_cat_new, aes(rincome)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```

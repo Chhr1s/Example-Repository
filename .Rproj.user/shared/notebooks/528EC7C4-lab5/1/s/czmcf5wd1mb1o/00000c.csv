@@ -1,0 +1,3 @@
+"0","avg_ais_dat <- ais %>% select(rcc, bmi, sport) %>% group_by(sport) %>% summarize(avg_bmi = mean(bmi), avg_rcc = mean(rcc))"
+"0","rio::export(avg_ais_dat, 'avg_ais_dat.xlsx', 'xlsx')"
+"0","rio::export(avg_ais_dat, 'avg_ais_dat.sav', 'spss')"

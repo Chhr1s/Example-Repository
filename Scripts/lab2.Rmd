@@ -1,0 +1,124 @@
+---
+title: "Lab 2"
+author: "Christopher Loan"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+#Ignore this code chunk for now. 
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+Run the following code to 
+  (a) install the {nlme} and {janitor} packages
+  (b) load the packages along with the tidyverse, and
+  (c) access and quickly prep some data (from the {nmle} package) for plotting.
+
+```{r eval=FALSE}
+# Note: You only need to run this next line one time to install these two packages.
+install.packages(c("nlme", "janitor")) #(a)
+```
+
+
+```{r data-download}
+
+library(nlme) # (b)
+library(janitor) # (b)
+library(tidyverse) # (b)
+
+pd <- Oxboys %>% # (c)
+  clean_names() %>% 
+  mutate(subject = factor(subject),
+         occasion = factor(occasion)) %>% 
+  filter(subject == "10" | subject == "4" | subject == "7") %>% 
+  tbl_df()
+```
+
+1. Reproduce the following two plots, using the *pd* data. You can use whatever theme you want (I used `theme_minimal()`), but all else should be the same. 
+
+
+```{r plots1, message = FALSE, warning = FALSE}
+
+# Put code below for Plot 1. Note that Plot 1 is a line plot, not a smooth.
+# pd %>% filter(subject == c('10','4','7'))
+
+plot1 <-
+  pd %>% ggplot(mapping = aes(x = age, y = height)) +
+  geom_line() + theme_minimal() + facet_wrap(~subject) + ggtitle("Plot 1")
+plot1
+```
+\newpage
+```{r}
+# Put code below for Plot 2. Note that Plot 2 is a line plot also.
+
+plot2 <-
+  pd %>% ggplot(mapping = aes(x = age, y = height, color = subject)) +
+  geom_line() + theme_minimal() + ggtitle("Plot 2")
+
+plot2
+```
+
+\newpage
+
+2. Use the *mtcars* dataset from base R to replicate the following plots. (Just type *mtcars* into the console to see the dataset).
+
+```{r plots2}
+
+# Put code below for Plot 3
+plot3 <- 
+  mtcars %>% ggplot(mapping = aes(x = drat, y = mpg)) + 
+  geom_point() + ggtitle("Plot 3") + theme_minimal()
+plot3
+```
+\newpage
+```{r}
+# Put code below for Plot 4
+plot4 <- plot3 + geom_smooth() + ggtitle("Plot 4")
+plot4
+
+```
+\newpage
+```{r}
+# Put code below for Plot 5
+plot5 <- plot3 + geom_smooth(method = "lm") + facet_wrap(~vs) + ggtitle("Plot 5")
+plot5
+```
+\newpage
+```{r}
+# Put code below for Plot 6. I have given you the first line of code to start.
+plot6 <- 
+  ggplot(mtcars, aes(drat, mpg, color = factor(cyl))) + geom_point() + geom_smooth(method = "lm", se = F) + ggtitle("Plot 6") + theme_minimal()
+
+plot6
+```
+\newpage
+
+
+3. Use the *Orange* dataset, also part of base R, to replicate the following plots.
+   
+```{r orange-plots}
+# Put code below for Plot 7
+plot7 <- Orange %>% 
+  ggplot(mapping = aes(x = age, y = circumference, color = Tree)) + 
+  geom_point() + geom_line()+ theme_minimal() + ggtitle("Plot 7")
+plot7 
+```
+\newpage
+```{r}
+# Put code below for the last plot. See slide 51 from the w2p2 class for labels.
+
+plot8 <- Orange %>% 
+  ggplot(mapping = aes(x = age, y = circumference)) + 
+  geom_point(aes(color = Tree)) + 
+  geom_smooth(method = "lm", se = F, color = "darkgray") + 
+  theme_minimal() + 
+  labs(x = "Age of Tree (in days)",
+       y = "Circumference of the Trunk (in mm)",
+       title = "Orange Tree Growth",       
+       subtitle = "Gray line displays a linear model fit to the data"
+       )
+plot8
+```

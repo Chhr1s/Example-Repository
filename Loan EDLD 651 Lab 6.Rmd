@@ -1,0 +1,85 @@
+---
+title: "Loan EDLD 651 Lab 6"
+author: "Christopher Loan"
+date: "10/23/2020"
+output: 
+  pdf_document:
+    highlight: espresso
+---
+
+```{r setup, include = F}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	fig.height = 4.5,
+	fig.width = 6.5,
+	message = FALSE,
+	warning = FALSE,
+	include = TRUE
+)
+```
+
+```{r libraries}
+# 2. Load Libraries
+library(tidyverse)
+library(here)
+library(rio)
+library(janitor)
+theme_set(theme_minimal())
+```
+
+```{r data}
+eclsk <- import(here('data', 'ecls-k_samp.sav')) %>% clean_names()
+```
+
+```{r plot, echo = F, include = T}
+eclsk %>%
+  filter(ethnic < 5) %>%
+  arrange(desc(ethnic)) %>% 
+  characterize() %>% 
+  ggplot(aes(x = t1mscale, y = t2mscale)) +
+  geom_point() + 
+  geom_smooth(method = 'lm', aes(color = school_type))+
+  facet_wrap(~ethnic) 
+
+```
+
+```{r descriptives}
+t1mean <- mean(eclsk$t1mscale, na.rm = TRUE) 
+t1sd <- sd(eclsk$t1mscale, na.rm = TRUE)
+t2mean <- mean(eclsk$t2mscale, na.rm = TRUE) 
+t2sd <- sd(eclsk$t2mscale, na.rm = TRUE)
+
+average_gain <- t2mean - t1mean
+
+```
+
+The mean difference observed was `r average_gain`.
+
+# Loading Data
+
+Loading data is particularly easy when you use both the `{here}` and the `{rio}` packages. 
+
+`here::here()` provides a heuristic to help you find the filepath needed for your data.
+
+The code below will return simply the filepath for your current working directory:
+
+```{r echo = T, eval = F}
+here::here()
+```
+
+If you keep your data in a subfolder of your current working directory (e.g., let's call ours "data"), then you can reference that folder by including it in the function call:
+
+```{r echo = T, eval = F}
+here::here('data')
+```
+
+We're almost there; now we just need to give it the file name and import it. 
+
+Similar to folder names, we specify this by putting the name of the document in quotes. Just separate the two with a comma. 
+
+To actually import the data, we'll have to use `rio::import()`, which is a wrapper function for several importing functions from various packages.
+
+Place this function around the `here::here()` call & don't forget to store the object with the `<-` operator!
+```{r  echo = T, eval = F}
+dat <- rio::import(here::here('data', 'datafile.csv'))
+```
