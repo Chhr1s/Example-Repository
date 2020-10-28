@@ -31,6 +31,11 @@ theme_set(theme_minimal())
 eclsk <- import(here('data', 'ecls-k_samp.sav')) %>% clean_names()
 ```
 
+```{r}
+### adding a comment
+
+```
+
 ```{r plot, echo = F, include = T}
 eclsk %>%
   filter(ethnic < 5) %>%
