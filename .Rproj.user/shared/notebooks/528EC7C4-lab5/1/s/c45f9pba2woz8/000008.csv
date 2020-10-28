@@ -1,4 +1,0 @@
-"0","ais <- import(here(""Data"", ""ais.xlsx"")), skip = 14)
-"
-"2","Error: unexpected ',' in ""ais <- import(here(""Data"", ""ais.xlsx"")),""
-"
