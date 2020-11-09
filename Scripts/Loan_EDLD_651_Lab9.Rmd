@@ -1,0 +1,72 @@
+---
+title             : "EDUC 651 Lab 9"
+shorttitle        : "Lab 9"
+
+author: 
+  - name          : "Christopher M. Loan"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    email         : "cloan@uoregon.edu"
+    role:         
+      - all parts of the lab
+
+affiliation:
+  - id            : "1"
+    institution   : "University of Oregon"
+
+keywords          : "keywords"
+wordcount         : "X"
+
+floatsintext      : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man, fleqn, noextraspace"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+library(tidyverse)
+library(rio)
+library(here)
+```
+
+Here, I am *loading* the data, but am not **showing** the data.
+
+```{r}
+dat <- import(here("data", "ecls-k_samp.sav"))
+```
+
+A multiple regression equation with outcome math at time 2 is shown below; covariates include *math at time 1*, *socioeconomic status*, and an *interaction of the two*.
+
+$$
+math_{t2_i} = \alpha + \beta_{1}(math_{t1_i}) + \beta_{2}(SES{cat_i}) + \beta_{3}(math_{t1_i} × SES{cat_i}) + \epsilon
+$$
+
+This same equation can be seen in the **plot below**.
+
+```{r message=FALSE, warning=FALSE}
+
+dat %>% 
+  mutate(`SES Quintile` = 
+           factor(SES_cat, levels = c(1:5),
+                  labels = 
+                    c('First', 'Second', 'Third', 
+                      'Fourth', 'Fifth'))) %>% 
+  ggplot(aes(x = T1MSCALE, y = T2MSCALE)) + 
+  geom_point(color = 'gray70', size = .75) + 
+  geom_smooth(method = 'lm', se = F,  
+              aes(color = `SES Quintile`)) + 
+  labs(title = "Math Scores",
+       subtitle = "Relation from Time 1 to Time 2",
+       y = 'Math Score (time 2)',
+       x = 'Math Score (time 1)'
+       ) + 
+  theme_minimal()
+```
