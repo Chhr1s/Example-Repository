@@ -1,0 +1,111 @@
+---
+title: "Loan EDLD 651 Lab 10"
+author: "Christopher Loan"
+date: "11/15/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    highlight: kate
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+library(tidyverse)
+library(here)
+library(rio)
+```
+
+# Importing the Data & Binding (#4)
+```{r data}
+fotr_dat <- import(here("data", "The_Fellowship_Of_The_Ring.csv"))
+tt_dat <- import(here("data", "The_Two_Towers.csv"))
+rotk_dat <- import(here("data", "The_Return_Of_The_king.csv"))
+lotr_tidy <- fotr_dat %>% bind_rows(tt_dat) %>% bind_rows(rotk_dat)
+lotr_tidy 
+```
+
+# Is the data tidy? No. Why not? (#5)
+The data above is not tidy because the columns "Male" and "Female" should both be listed on their own row.
+
+# Tidying the data (#6)
+
+```{r cleaning}
+lotr_tidy <- lotr_tidy %>% 
+  pivot_longer(cols = c(Female, Male), 
+               names_to = 'Gender',
+               values_to = 'Word_Count')
+
+lotr_tidy %>% export(here("data", "lotr_tidy.csv"))
+```
+
+# Tidying the data (pt. 2: from Male.csv & Female.csv; #7)
+
+```{r}
+male <- import(here('data', 'Male.csv'))
+female <- import(here('data', 'Female.csv'))
+
+joined_dat <- male %>% 
+  bind_rows(female) 
+
+joined_dat <- 
+  joined_dat %>% 
+  pivot_longer(cols = c(Elf, Hobbit, Man),
+              names_to = "Race", 
+              values_to = "Word_Count") #%>% 
+  
+joined_dat <- 
+  joined_dat %>% 
+  relocate(c("Film", "Race")) %>% 
+  arrange(desc(Word_Count), Race, Gender)
+
+joined_dat$Race <- 
+  ifelse(joined_dat$Race == "Man", 
+         "Human", 
+         joined_dat$Race)
+```
+
+
+## Do these two tables match perfectly? (Extra code chunk)
+```{r equivalence}
+sum(
+  joined_dat %>% 
+  arrange(desc(Word_Count), Race, Gender) != 
+    lotr_tidy %>% 
+    arrange(desc(Word_Count), Race, Gender)
+  ) == 0
+```
+
+## What were the total number of words spoken by each "Race" of humanoid in the LOTR trilogy? 
+
+```{r visualization, results = "asis"}
+lotr_tidy %>% 
+  group_by(Race) %>% 
+  summarize(total_words = mean(Word_Count)) %>% 
+  tibble() %>% knitr::kable(col.names = c("Race", "Total Words"))
+
+lotr_tidy %>% 
+  group_by(Race) %>% 
+  summarize(total_words = mean(Word_Count)) %>% 
+  ggplot(aes(x = Race, y = total_words, fill = Race)) + 
+  geom_col() + 
+  theme_minimal() + 
+  labs(y = "Total Words Across Trilogy", 
+       title = "Words Spoken by Race in LOTR Trilogy")
+```
+
+# Messying the data (#8)
+
+```{r messying}
+messy_dat1 <- lotr_tidy %>% 
+  pivot_wider(names_from = Race, 
+              values_from = Word_Count)
+messy_dat1
+messy_dat2 <- lotr_tidy %>% 
+  pivot_wider(names_from = Gender, 
+              values_from = Word_Count)
+messy_dat2
+```
