@@ -1,0 +1,72 @@
+---
+title: "Loan_EDLD_Lab_11.Rmd"
+author: "Christopher Loan"
+date: "11/18/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    highlight: kate
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = F,
+                      warning = F 
+                      )
+library(tidyverse)
+library(rio)
+library(here)
+library(janitor)
+```
+
+# Tidy the *Project Reads* Data
+
+## Loading data
+
+```{r, data}
+dat_original <- import(here("data", "Project_Reads_Scores.csv")) %>% clean_names()
+```
+
+## Removing columns (5-9, 24, & 25)
+
+```{r, removing_cols}
+dat_narrow <- dat_original %>% select(-c(5:9, 24, 25))
+```
+
+## Removing aggregates
+
+```{r, removing_averages}
+dat_narrow$student_id <- dat_narrow$student_id %>% 
+  make_clean_names()
+dat_filtered <- dat_narrow %>% 
+  filter(student_id != "all_students_average" & 
+         student_id != "all_students_average_2" &
+         student_id != "all_students_average_3") 
+```
+
+## Tidying data
+## the chunk below isn't finished
+```{r eval=FALSE, include=FALSE}
+dat_filtered[,5:ncol(dat_filtered)] <-
+  dat_filtered %>% 
+  select(5:ncol(dat_filtered)) 
+  
+dat_filtered %>% 
+  mutate_if(is.character, str_sub(end, -1))
+
+
+  rename(unit_5_score = "unit_5_6_score",
+         unit_5_percent = "unit_5_6_percent") %>% 
+  pivot_longer(cols = -c(test_year, 
+                         test_type, 
+                         test_site,
+                         student_id), 
+               names_to = 
+                 c("unit_(.)", 
+                   #"unit_val", 
+                   "score_type"),
+               names_sep = "_",
+               values_to = "value")
+```
