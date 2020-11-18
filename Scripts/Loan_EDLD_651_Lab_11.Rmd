@@ -46,7 +46,7 @@ dat_filtered <- dat_narrow %>%
          student_id != "all_students_average_3") 
 ```
 
-## Tidying data
+## Final tidying steps
 
 ```{r, tidying}
 dat_renamed <- dat_filtered %>% 
@@ -64,11 +64,15 @@ dat <- dat_pivoted_1 %>% mutate(percent = parse_number(percent))
 head(dat,3)
 ```
 
+# 2. Summary Table
+
 ```{r, table}
 dat %>% group_by(test_site) %>% 
   summarize(mean_pct = round(mean(percent),2)) %>% 
   knitr::kable(col.names = c('Test Site', 'Mean Percent Correct'))
 ```
+
+# 3. Plotting Summary Data
 
 ```{r}
 dat %>% 
@@ -80,6 +84,8 @@ dat %>%
        title = 'Mean Percentage on Tests based on Testing Site') +
   theme_minimal() 
 ```
+
+# 4. Exploratory Plot of Tided Data
 
 ```{r}
 dat %>% mutate(`test site` = test_site,
