@@ -47,26 +47,51 @@ dat_filtered <- dat_narrow %>%
 ```
 
 ## Tidying data
-## the chunk below isn't finished
-```{r eval=FALSE, include=FALSE}
-dat_filtered[,5:ncol(dat_filtered)] <-
-  dat_filtered %>% 
-  select(5:ncol(dat_filtered)) 
-  
-dat_filtered %>% 
-  mutate_if(is.character, str_sub(end, -1))
 
+```{r, tidying}
+dat_renamed <- dat_filtered %>% 
+  rename(unit_56_score = unit_5_6_score,
+         unit_56_percent = unit_5_6_percent) 
 
-  rename(unit_5_score = "unit_5_6_score",
-         unit_5_percent = "unit_5_6_percent") %>% 
-  pivot_longer(cols = -c(test_year, 
-                         test_type, 
-                         test_site,
-                         student_id), 
+dat_pivoted_1 <- dat_renamed %>% 
+  pivot_longer(cols = contains("unit"), 
                names_to = 
-                 c("unit_(.)", 
-                   #"unit_val", 
-                   "score_type"),
-               names_sep = "_",
-               values_to = "value")
+                 c("unit_number", ".value"),
+               names_prefix = "unit_",
+               names_sep = "_"
+               )
+dat <- dat_pivoted_1 %>% mutate(percent = parse_number(percent))
+head(dat,3)
+```
+
+```{r, table}
+dat %>% group_by(test_site) %>% 
+  summarize(mean_pct = round(mean(percent),2)) %>% 
+  knitr::kable(col.names = c('Test Site', 'Mean Percent Correct'))
+```
+
+```{r}
+dat %>% 
+  group_by(test_site) %>% 
+  summarize(`Mean Percentage` = round(mean(percent),2)) %>%
+  ggplot(aes(x = test_site, y = `Mean Percentage`)) + 
+  geom_col(fill = c(2:4)) + 
+  labs(x = 'Test Site', 
+       title = 'Mean Percentage on Tests based on Testing Site') +
+  theme_minimal() 
+```
+
+```{r}
+dat %>% mutate(`test site` = test_site,
+               `unit number` = unit_number) %>% 
+  ggplot(aes(x = `unit number`,
+             y = percent,
+             size = score,
+             color = `test site`
+             )) +
+  geom_jitter() +
+  facet_wrap(~`test site`) + 
+  theme_minimal() + 
+  labs(title = 'Score Percentage* by Unit Number',
+         subtitle = '*NOTE: raw score indicated by dot size')
 ```
