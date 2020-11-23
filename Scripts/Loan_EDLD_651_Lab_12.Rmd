@@ -1,0 +1,114 @@
+---
+title: "Loan_EDLD_651_Lab12"
+author: "Christopher Loan"
+date: "11/23/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    highlight: kate
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = F,
+                      warning = F)
+library(babynames)
+library(tidyverse)
+library(stringr)
+library(forcats)
+```
+
+```{r load}
+dat <- babynames
+```
+
+# 2. Working with Strings
+
+```{r last_letter}
+dat <- dat %>% mutate(last_letter = str_sub(name, -1))
+```
+
+```{r vowels}
+vowels <- c("a", "e", "i", "o", "u", "y")
+dat <- dat %>% mutate(
+  vowel_log = str_detect(
+    string = dat$last_letter,
+    pattern = vowels))
+```
+
+```{r weighted_mean}
+dat_wm <- dat %>% 
+  group_by(year, sex) %>% 
+  mutate(weighted_mean = weighted.mean(
+                x = vowel_log, w = n)
+         )
+
+dat_wm %>% 
+  ggplot(aes(x = year, 
+             y = weighted_mean, 
+             group = sex, 
+             color = sex)) + 
+  geom_line() + 
+  theme_minimal() + 
+  labs(title = 
+         "Proportion of names ending in vowel over time",
+       y = 'Proportion')
+```
+
+# 3. Working with Factors
+
+```{r gss_cat_plot}
+dat2 <- gss_cat
+dat2_complete <- dat2 %>% filter(!is.na(tvhours)) 
+dat2_complete$tvhours_fct <- factor(dat2_complete$tvhours)
+
+dat2_complete %>% 
+  group_by(marital) %>% 
+  arrange(desc(tvhours_fct)) %>% 
+  mutate(mean = mean(tvhours)) %>% 
+  ggplot(aes(x = tvhours, y = marital)) + 
+  geom_jitter(color = 'coral3') + 
+  labs(title = 'Hours of TV watched by Marital Status',
+       y = 'Marital Status', 
+       x = 'Hours of TV') + 
+  theme_minimal()
+```
+
+# 4. Using the `gss_cat` data within the `{forcats}` package:
+
+```{r show_levels}
+dat2$marital %>% levels()
+```
+
+```{r recoding}
+dat2_recode <- dat2_complete %>% 
+  mutate(marital_recoded = 
+           recode(marital, 
+                  "Never married" = "Not married", 
+                  "Divorced" = "Not married", 
+                  "Widowed" = "Not married",
+                  "Separated" = "Married")
+         )
+dat2_recode$marital_recoded %>% levels()
+```
+
+```{r plotting_averages}
+dat3 <- dat2_recode %>%
+  group_by(marital_recoded) %>%
+  mutate(mean_tv = mean(tvhours),
+         `Marital Status` = marital_recoded
+         ) %>%
+  arrange(desc(mean_tv))
+
+dat3 %>% 
+  ggplot(aes(x = `Marital Status`, 
+             y = mean_tv, 
+             fill = `Marital Status`
+             )) +
+  geom_bar(stat = 'summary', fun = 'mean') +
+  labs(title = 'Average hours of TV by Marital Status',
+       y = 'Average hours of TV') +
+  theme_minimal()
+```
