@@ -31,11 +31,11 @@ dat <- dat %>% mutate(last_letter = str_sub(name, -1))
 ```
 
 ```{r vowels}
-vowels <- c("a", "e", "i", "o", "u", "y")
+#vowels <- c("a", "e", "i", "o", "u", "y")
 dat <- dat %>% mutate(
   vowel_log = str_detect(
     string = dat$last_letter,
-    pattern = vowels))
+    pattern = "[aeiouy]"))
 ```
 
 ```{r weighted_mean}
