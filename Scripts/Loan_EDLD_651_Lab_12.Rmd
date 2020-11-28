@@ -68,7 +68,7 @@ dat2_complete %>%
   group_by(marital) %>% 
   arrange(desc(tvhours_fct)) %>% 
   mutate(mean = mean(tvhours)) %>% 
-  ggplot(aes(x = tvhours, y = marital)) + 
+  ggplot(aes(x = mean, y = marital)) + 
   geom_jitter(color = 'coral3') + 
   labs(title = 'Hours of TV watched by Marital Status',
        y = 'Marital Status', 
